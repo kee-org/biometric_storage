@@ -16,9 +16,13 @@ class InitOptions {
   init(params: [String: Any]) {
     authenticationValidityDurationSeconds = params["authenticationValidityDurationSeconds"] as? Int
     authenticationRequired = params["authenticationRequired"] as? Bool
+    iosAccessGroupPlistKey = params["iosAccessGroupPlistKey"] as? String
+      iosKeychainServiceName = (params["iosKeychainServiceName"] as? String)!
   }
   let authenticationValidityDurationSeconds: Int!
   let authenticationRequired: Bool!
+  let iosAccessGroupPlistKey: String?
+  let iosKeychainServiceName: String
 }
 
 class IOSPromptInfo {
@@ -52,9 +56,19 @@ class BiometricStorageImpl {
   }
 
   private func baseQuery(name: String) -> [String: Any] {
-    return [kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "flutter_biometric_storage",
-            kSecAttrAccount as String: name]
+      guard let initOptions = stores[name] else {
+          return [:]
+      }
+    var query = [kSecClass as String: kSecClassGenericPassword,
+                 kSecAttrService as String: initOptions.iosKeychainServiceName,
+                 kSecAttrAccount as String: name] as [String : Any]
+    
+      if (initOptions.iosAccessGroupPlistKey != nil) {
+        if let accessGroupName = Bundle.main.infoDictionary![initOptions.iosAccessGroupPlistKey!] as? String {
+        query[kSecAttrAccessGroup as String] = accessGroupName;
+      }
+    }
+    return query;
   }
 
   private func currentContext(name: String) -> LAContext {

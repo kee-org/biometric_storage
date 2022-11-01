@@ -14,7 +14,9 @@ private val logger = KotlinLogging.logger {}
 data class InitOptions(
     val authenticationValidityDurationSeconds: Int = -1,
     val authenticationRequired: Boolean = true,
-    val androidBiometricOnly: Boolean = true
+    val androidBiometricOnly: Boolean = true,
+    val iosKeychainServiceName: String = "",
+    val iosAccessGroupPlistKey: String = ""
 )
 
 class BiometricStorageFile(

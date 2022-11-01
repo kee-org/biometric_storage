@@ -79,11 +79,12 @@ class AuthException implements Exception {
 }
 
 class StorageFileInitOptions {
-  StorageFileInitOptions({
-    this.authenticationValidityDurationSeconds = -1,
-    this.authenticationRequired = true,
-    this.androidBiometricOnly = true,
-  });
+  StorageFileInitOptions(
+      {this.authenticationValidityDurationSeconds = -1,
+      this.authenticationRequired = true,
+      this.androidBiometricOnly = true,
+      this.iosAccessGroupPlistKey,
+      this.iosKeychainServiceName = 'flutter_biometric_storage'});
 
   final int authenticationValidityDurationSeconds;
 
@@ -102,11 +103,23 @@ class StorageFileInitOptions {
   /// https://github.com/authpass/biometric_storage/issues/12#issuecomment-902508609
   final bool androidBiometricOnly;
 
+  /// Leave blank to keep the value accessible to only the current app that wrote it.
+  /// See https://developer.apple.com/documentation/security/ksecattraccessgroup for
+  /// more about sharing the value between multiple apps in your group
+  final String? iosAccessGroupPlistKey;
+
+  /// Defaults to "flutter_biometric_storage" for backwards compatibility. You can
+  /// set it to your app name using `Bundle.main.bundleIdentifier` which could aid
+  /// user discoverability on MacOS.
+  final String iosKeychainServiceName;
+
   Map<String, dynamic> toJson() => <String, dynamic>{
         'authenticationValidityDurationSeconds':
             authenticationValidityDurationSeconds,
         'authenticationRequired': authenticationRequired,
         'androidBiometricOnly': androidBiometricOnly,
+        'iosAccessGroupPlistKey': iosAccessGroupPlistKey,
+        'iosKeychainServiceName': iosKeychainServiceName
       };
 }
 
