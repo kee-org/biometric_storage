@@ -45,6 +45,8 @@ enum class CanAuthenticateResponse(val code: Int) {
     ErrorNoBiometricEnrolled(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED),
     ErrorNoHardware(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE),
     ErrorStatusUnknown(BiometricManager.BIOMETRIC_STATUS_UNKNOWN),
+    ErrorSecurityUpdateRequired(BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED),
+    ErrorUnsupportedOptions(BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED)
     ;
 
     override fun toString(): String {
@@ -310,9 +312,20 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
     }
 
     private fun canAuthenticate(): CanAuthenticateResponse {
-        val response = biometricManager.canAuthenticate(
-            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-        )
+        //TODO: options.androidBiometricOnly could tell us if we want to check for biometrics only (within the current limitation of Android R+) but that would require an API change. Better approach might be to revert all changes to this method and create a whole new API that exposes parameters to limit the check to specific combinations of biometrics, passcodes, PINs, etc. and/or can return a list of which methods are supported.
+        val biometricOnly = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+        var response = -1
+        if (!biometricOnly) {
+            response = biometricManager.canAuthenticate(
+                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+            )
+        }
+        // Try with a more compatible request if we haven't tried yet or may still have a chance of success
+        if (response < 0) {
+            response = biometricManager.canAuthenticate(
+                BIOMETRIC_STRONG
+            )
+        }
         return CanAuthenticateResponse.values().firstOrNull { it.code == response }
             ?: throw Exception(
                 "Unknown response code {$response} (available: ${

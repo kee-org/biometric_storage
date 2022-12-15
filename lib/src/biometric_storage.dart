@@ -24,6 +24,13 @@ enum CanAuthenticateResponse {
 
   /// Plugin does not support platform. This should no longer be the case.
   unsupported,
+
+  errorSecurityUpdateRequired,
+
+  /// Android returns this if requested authentication methods are not supported.
+  /// Shouldn't happen since we now protect against this for Android < R but
+  /// some manufacturers might still use it in other circumstances
+  errorUnsupportedOptions,
 }
 
 const _canAuthenticateMapping = {
@@ -33,6 +40,9 @@ const _canAuthenticateMapping = {
   'ErrorNoHardware': CanAuthenticateResponse.errorNoHardware,
   'ErrorUnknown': CanAuthenticateResponse.unsupported,
   'ErrorStatusUnknown': CanAuthenticateResponse.statusUnknown,
+  'ErrorSecurityUpdateRequired':
+      CanAuthenticateResponse.errorSecurityUpdateRequired,
+  'ErrorUnsupportedOptions': CanAuthenticateResponse.errorUnsupportedOptions,
 };
 
 enum AuthExceptionCode {
