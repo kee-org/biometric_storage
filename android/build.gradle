@@ -39,6 +39,7 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    namespace "design.codeux.biometric_storage"
 }
 
 dependencies {
