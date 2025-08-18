@@ -74,6 +74,16 @@ https://developer.apple.com/documentation/localauthentication/logging_a_user_int
 **Known Issue**: since iOS 15 the simulator seem to no longer support local authentication:
     https://developer.apple.com/forums/thread/685773
 
+##### Deploying to physical devices
+
+To test or debug on a physical device, Apple must certify your app. The same applies if you are using the example app in this repository. We have simplified the steps necessary for setting up your environment:
+
+1. Copy `example/ios/DeveloperSettings.xcconfig.example` to `example/ios/DeveloperSettings.xcconfig`
+2. Change the values as described in that file
+3. Re-open the project in Xcode
+
+**Note** The above steps are not necessary for launching the app in a simulator.
+
 #### Mac OS
 
 * include the NSFaceIDUsageDescription key in your app’s Info.plist file

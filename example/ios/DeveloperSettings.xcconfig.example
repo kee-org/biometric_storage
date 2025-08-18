@@ -1,0 +1,5 @@
+// To deploy/debug/test on a physical device you must change these values so
+// you have a unique identifier and your personal or company team ID. Team ID
+// can remain blank if you are only developing in simulators.
+LOCAL_BUNDLE_IDENTIFIER = your.company.biometricStorageExample
+LOCAL_DEVELOPMENT_TEAM = // Leave blank or put your team ID
