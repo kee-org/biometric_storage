@@ -134,7 +134,11 @@ class StorageFileInitOptions {
   /// we can reuse the `LAContext` object for the given amount of time.
   /// see https://github.com/authpass/biometric_storage/pull/73
   /// This is pretty much undocumented behavior, but works similar to
-  /// `androidAuthenticationValidityDuration`.
+  /// `androidAuthenticationValidityDuration`. The main difference is that the
+  ///  grace period begins when the first request for authentication is made, not
+  ///  when the user successfully completes it. For this reason, avoid setting
+  ///  very low durations - for users authenticating via PIN/password, it is
+  ///  unlikely they will benefit from any value below 5 seconds.
   ///
   /// See also [darwinTouchIDAuthenticationAllowableReuseDuration]
   final Duration? darwinTouchIDAuthenticationForceReuseContextDuration;
