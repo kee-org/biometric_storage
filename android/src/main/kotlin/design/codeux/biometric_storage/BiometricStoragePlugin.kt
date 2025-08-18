@@ -46,6 +46,8 @@ enum class CanAuthenticateResponse(val code: Int) {
     ErrorNoBiometricEnrolled(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED),
     ErrorNoHardware(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE),
     ErrorStatusUnknown(BiometricManager.BIOMETRIC_STATUS_UNKNOWN),
+    ErrorSecurityUpdateRequired(BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED),
+    ErrorUnsupportedOptions(BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED),
     ErrorPasscodeNotSet(-99),
     ;
 
@@ -332,8 +334,10 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
             logger.warn { "called `canAuthenticate` with initOptions.authenticationRequired == false. $initOptions" }
             return CanAuthenticateResponse.Success
         }
+        val biometricOnly =
+            initOptions.androidBiometricOnly || Build.VERSION.SDK_INT < Build.VERSION_CODES.R
         val response = biometricManager.canAuthenticate(
-            if (initOptions.androidBiometricOnly) {
+            if (biometricOnly) {
                 BIOMETRIC_STRONG
             } else {
                 DEVICE_CREDENTIAL or BIOMETRIC_STRONG
