@@ -170,12 +170,12 @@ class BiometricStorageFile {
   private var _context: StoredContext?
   private var context: LAContext {
     get {
-      if let context = _context {
-        if context.expireAt.timeIntervalSinceNow < 0 {
+      if let storedContext = _context {
+        if storedContext.expireAt.timeIntervalSinceNow < 0 {
           // already expired.
           _context = nil
         } else {
-          return context.context
+          return storedContext.context
         }
       }
       
