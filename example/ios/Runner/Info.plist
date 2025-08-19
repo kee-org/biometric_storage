@@ -23,7 +23,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Exame of using face id</string>
+	<string>Example of using face id</string>
+	<key>ExampleOfSharedAccessGroupKey</key>
+	<string>ExampleOfSharedAccessGroupName</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

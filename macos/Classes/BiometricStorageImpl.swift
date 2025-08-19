@@ -18,11 +18,15 @@ class InitOptions {
     darwinTouchIDAuthenticationForceReuseContextDuration = params["darwinTouchIDAuthenticationForceReuseContextDurationSeconds"] as? Int
     authenticationRequired = params["authenticationRequired"] as? Bool
     darwinBiometricOnly = params["darwinBiometricOnly"] as? Bool
+    iosAccessGroupPlistKey = params["iosAccessGroupPlistKey"] as? String
+    iosKeychainServiceName = (params["iosKeychainServiceName"] as? String)!
   }
   let darwinTouchIDAuthenticationAllowableReuseDuration: Int?
   let darwinTouchIDAuthenticationForceReuseContextDuration: Int?
   let authenticationRequired: Bool!
   let darwinBiometricOnly: Bool!
+  let iosAccessGroupPlistKey: String?
+  let iosKeychainServiceName: String
 }
 
 class IOSPromptInfo {
@@ -202,11 +206,10 @@ class BiometricStorageFile {
   }
   
   private func baseQuery(_ result: @escaping StorageCallback) -> [String: Any]? {
-    var query = [
-      kSecClass as String: kSecClassGenericPassword,
-      kSecAttrService as String: "flutter_biometric_storage",
-      kSecAttrAccount as String: name,
-    ] as [String : Any]
+    
+    var query = [kSecClass as String: kSecClassGenericPassword,
+                 kSecAttrService as String: initOptions.iosKeychainServiceName,
+                 kSecAttrAccount as String: name] as [String : Any]
     if initOptions.authenticationRequired {
       guard let access = accessControl(result) else {
         return nil
@@ -215,6 +218,11 @@ class BiometricStorageFile {
         query[kSecUseDataProtectionKeychain as String] = true
       }
       query[kSecAttrAccessControl as String] = access
+    }
+    if (initOptions.iosAccessGroupPlistKey != nil) {
+      if let accessGroupName = Bundle.main.infoDictionary![initOptions.iosAccessGroupPlistKey!] as? String {
+        query[kSecAttrAccessGroup as String] = accessGroupName;
+      }
     }
     return query
   }

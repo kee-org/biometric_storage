@@ -88,12 +88,15 @@ class StorageFileInitOptions {
     Duration? darwinTouchIDAuthenticationAllowableReuseDuration,
     this.darwinTouchIDAuthenticationForceReuseContextDuration,
     @Deprecated(
-        'use use androidAuthenticationValidityDuration, iosTouchIDAuthenticationAllowableReuseDuration or iosTouchIDAuthenticationForceReuseContextDuration instead')
+      'use androidAuthenticationValidityDuration, iosTouchIDAuthenticationAllowableReuseDuration or iosTouchIDAuthenticationForceReuseContextDuration instead',
+    )
     int authenticationValidityDurationSeconds = -1,
     this.authenticationRequired = true,
     this.androidUseStrongBox = true,
     this.androidBiometricOnly = true,
     this.darwinBiometricOnly = true,
+    this.iosAccessGroupPlistKey,
+    this.iosKeychainServiceName = 'flutter_biometric_storage',
   })  : androidAuthenticationValidityDuration =
             androidAuthenticationValidityDuration ??
                 (authenticationValidityDurationSeconds <= 0
@@ -155,6 +158,16 @@ class StorageFileInitOptions {
   /// Defaults to `true` for backwards compatibility.
   final bool androidUseStrongBox;
 
+  /// Leave blank to keep the value accessible to only the current app that wrote it.
+  /// See https://developer.apple.com/documentation/security/ksecattraccessgroup for
+  /// more about sharing the value between multiple apps in your group
+  final String? iosAccessGroupPlistKey;
+
+  /// Defaults to "flutter_biometric_storage" for backwards compatibility. You can
+  /// set it to your app name using `Bundle.main.bundleIdentifier` which could aid
+  /// user discoverability on MacOS.
+  final String iosKeychainServiceName;
+
   Map<String, dynamic> toJson() => <String, dynamic>{
         'androidAuthenticationValidityDurationSeconds':
             androidAuthenticationValidityDuration?.inSeconds,
@@ -166,6 +179,8 @@ class StorageFileInitOptions {
         'androidBiometricOnly': androidBiometricOnly,
         'darwinBiometricOnly': darwinBiometricOnly,
         'androidUseStrongBox': androidUseStrongBox,
+        'iosAccessGroupPlistKey': iosAccessGroupPlistKey,
+        'iosKeychainServiceName': iosKeychainServiceName,
       };
 }
 
