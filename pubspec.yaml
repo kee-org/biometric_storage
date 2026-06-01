@@ -6,8 +6,8 @@ version: 5.1.1-dev.2
 homepage: https://github.com/authpass/biometric_storage/
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
-  flutter: ">=2.8.0"
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
 
 dependencies:
   flutter:
@@ -42,8 +42,10 @@ flutter:
         pluginClass: BiometricStoragePlugin
       ios:
         pluginClass: BiometricStoragePlugin
+        sharedDarwinSource: true
       macos:
-        pluginClass: BiometricStorageMacOSPlugin
+        pluginClass: BiometricStoragePlugin
+        sharedDarwinSource: true
       linux:
         pluginClass: BiometricStoragePlugin
       windows:

@@ -1,6 +1,3 @@
-// Shared file between iOS and Mac OS
-// make sure they stay in sync.
-
 import Foundation
 import LocalAuthentication
 
@@ -43,12 +40,12 @@ private func hpdebug(_ message: String) {
 }
 
 class BiometricStorageImpl {
-  
+
   init(storageError: @escaping StorageError, storageMethodNotImplemented: Any) {
     self.storageError = storageError
     self.storageMethodNotImplemented = storageMethodNotImplemented
   }
-  
+
   private var stores: [String: BiometricStorageFile] = [:]
   private let storageError: StorageError
   private let storageMethodNotImplemented: Any
@@ -58,7 +55,7 @@ class BiometricStorageImpl {
   }
 
   public func handle(_ call: StorageMethodCall, result: @escaping StorageCallback) {
-    
+
     func requiredArg<T>(_ name: String, _ cb: (T) -> Void) {
       guard let args = call.arguments as? Dictionary<String, Any> else {
         result(storageError(code: "InvalidArguments", message: "Invalid arguments \(String(describing: call.arguments))", details: nil))
@@ -82,7 +79,7 @@ class BiometricStorageImpl {
       }
       cb(file)
     }
-    
+
     if ("canAuthenticate" == call.method) {
       requiredArg("options") { options in
         let initOptions = InitOptions(params: options)
@@ -128,7 +125,7 @@ class BiometricStorageImpl {
       result(storageMethodNotImplemented)
     }
   }
-  
+
 
   private func canAuthenticate(options: InitOptions, result: @escaping StorageCallback) {
     var error: NSError?
@@ -178,7 +175,7 @@ class BiometricStorageFile {
           return storedContext.context
         }
       }
-      
+
       let context = LAContext()
       if (initOptions.authenticationRequired) {
         if let duration = initOptions.darwinTouchIDAuthenticationAllowableReuseDuration {
@@ -189,7 +186,7 @@ class BiometricStorageFile {
             hpdebug("Pre OSX 10.12 no touchIDAuthenticationAllowableReuseDuration available. ignoring.")
           }
         }
-        
+
         if let duration = initOptions.darwinTouchIDAuthenticationForceReuseContextDuration {
           _context = (context: context, expireAt: Date(timeIntervalSinceNow: Double(duration)))
         }
@@ -204,9 +201,9 @@ class BiometricStorageFile {
     self.initOptions = initOptions
     self.storageError = storageError
   }
-  
+
   private func baseQuery(_ result: @escaping StorageCallback) -> [String: Any]? {
-    
+
     var query = [kSecClass as String: kSecClassGenericPassword,
                  kSecAttrService as String: initOptions.iosKeychainServiceName,
                  kSecAttrAccount as String: name] as [String : Any]
@@ -226,10 +223,10 @@ class BiometricStorageFile {
     }
     return query
   }
-  
+
   private func accessControl(_ result: @escaping StorageCallback) -> SecAccessControl? {
     let accessControlFlags: SecAccessControlCreateFlags
-    
+
     if initOptions.darwinBiometricOnly {
       if #available(iOS 11.3, *) {
         accessControlFlags =  .biometryCurrentSet
@@ -239,11 +236,7 @@ class BiometricStorageFile {
     } else {
       accessControlFlags = .userPresence
     }
-        
-//      access = SecAccessControlCreateWithFlags(nil,
-//                                               kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-//                                               accessControlFlags,
-//                                               &error)
+
     var error: Unmanaged<CFError>?
     guard let access = SecAccessControlCreateWithFlags(
       nil, // Use the default allocator.
@@ -257,7 +250,7 @@ class BiometricStorageFile {
 
     return access
   }
-  
+
   func read(_ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
 
     guard var query = baseQuery(result) else {
@@ -268,9 +261,9 @@ class BiometricStorageFile {
     query[kSecReturnAttributes as String] = true
     query[kSecReturnData as String] = true
     query[kSecUseAuthenticationContext as String] = context
-    
+
     var item: CFTypeRef?
-    
+
     let status = SecItemCopyMatching(query as CFDictionary, &item)
     guard status != errSecItemNotFound else {
       result(nil)
@@ -289,13 +282,11 @@ class BiometricStorageFile {
     }
     result(dataString)
   }
-  
+
   func delete(_ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
     guard let query = baseQuery(result) else {
       return;
     }
-    //    query[kSecMatchLimit as String] = kSecMatchLimitOne
-    //    query[kSecReturnData as String] = true
     let status = SecItemDelete(query as CFDictionary)
     if status == errSecSuccess {
       result(true)
@@ -308,7 +299,7 @@ class BiometricStorageFile {
     }
     handleOSStatusError(status, result, "writing data")
   }
-  
+
   func write(_ content: String, _ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
     guard var query = baseQuery(result) else {
       return;
@@ -325,7 +316,6 @@ class BiometricStorageFile {
       hpdebug("No authentication required for \(name)")
     }
     query.merge([
-      //      kSecMatchLimit as String: kSecMatchLimitOne,
       kSecValueData as String: content.data(using: String.Encoding.utf8) as Any,
     ]) { (_, new) in new }
     var status = SecItemAdd(query as CFDictionary, nil)
@@ -341,7 +331,7 @@ class BiometricStorageFile {
     }
     result(nil)
   }
-  
+
   private func handleOSStatusError(_ status: OSStatus, _ result: @escaping StorageCallback, _ message: String) {
     var errorMessage: String? = nil
     if #available(iOS 11.3, OSX 10.12, *) {
@@ -354,8 +344,8 @@ class BiometricStorageFile {
     default:
       code = "SecurityError"
     }
-    
+
     result(storageError(code, "Error while \(message): \(status): \(errorMessage ?? "Unknown")", nil))
   }
-  
+
 }
