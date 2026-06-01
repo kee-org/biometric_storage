@@ -1,29 +1,19 @@
 group 'design.codeux.biometric_storage'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    ext.kotlin_version = '2.0.21'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+
+// For Flutter < 3.44 (AGP < 9): apply KGP manually since Flutter's built-in Kotlin
+// is not available in those environments.
+//
+// For Flutter >= 3.44 (AGP >= 9): KGP is injected by Flutter's built-in Kotlin mechanism.
+// We deliberately use pluginManager.apply() instead of `apply plugin: 'kotlin-android'`
+// so that Flutter's KGP regex scanner does NOT find a manual declaration and correctly
+// triggers its built-in Kotlin injection path.
+def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
+if (agpMajor < 9) {
+    pluginManager.apply("kotlin-android")
+}
 
 android {
     namespace "design.codeux.biometric_storage"
@@ -32,10 +22,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     sourceSets {
@@ -48,6 +34,14 @@ android {
     }
     lintOptions {
         disable 'InvalidPackage'
+    }
+}
+
+pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
     }
 }
 
